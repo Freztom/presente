@@ -7,6 +7,7 @@
 #define PLAYER_RAD 10
 #define PLAYER_SPEED 4
 #define PLAYER_COOLDOWN 8
+#define PLAYER_PORTAL_COOLDOWN 120
 
 #define MINION_HP   4
 #define MINION_RAD 12
@@ -23,6 +24,8 @@ typedef struct {
     entity ent;
     // Cooldown of the player's weapon. The player can shoot when it is <=0.
     int cooldown;
+    // New - Cooldown for the player after entering a portal, to maintain it in one piece.
+    int portal_cooldown;
 } player;
 
 // ==== ENEMY DEFINITION

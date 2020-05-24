@@ -8,8 +8,12 @@ void draw_level(const level *lvl){
         for(int x=-1;x<=lvl->size_x;x++){
             char cell = level_get(lvl,x,y);
             // If the cell is a wall, paint it
-            if(cell=='#'){
+            if(cell=='#' || cell=='W'){
                 DrawRectangle(TILE_SIZE*x,TILE_SIZE*y,TILE_SIZE,TILE_SIZE,BROWN);
+            }
+            if(cell=='P'){
+                DrawRectangle(TILE_SIZE*x+1,TILE_SIZE*y+1,TILE_SIZE-1,TILE_SIZE-1,DARKGREEN);
+                DrawRectangleLines(TILE_SIZE*x,TILE_SIZE*y,TILE_SIZE,TILE_SIZE,LIME);
             }
         }
     }

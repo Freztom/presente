@@ -3,13 +3,29 @@
 
 #define TILE_SIZE 48
 
+#define WALL_HP 20
+#define DEFAULT_HP 0
+
+#define PORTAL_AMOUNT 4
+
 /* A level is a matrix of cells, each cell is represented using chars.
 '.' = free cells
 '#' = walls
 */
+
+//Now each cell will be a struct.
+typedef struct {
+    char name;
+    // ID and position parameters can help towards interactions between cells.
+    int id;
+    int hp;
+} cell;
+
 typedef struct {
     int size_x, size_y;
-    char **cells;
+    int link_portalx[PORTAL_AMOUNT];
+    int link_portaly[PORTAL_AMOUNT];
+    cell **cells;
 } level;
 
 // Create a new level with the given size, allocates memory for it.

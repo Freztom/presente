@@ -11,8 +11,11 @@ int entity_physics(const level *lvl, entity *ent){
     int tile_x = (int) floor(ent->x/TILE_SIZE);
     int tile_y = (int) floor(ent->y/TILE_SIZE);
     char cell = level_get(lvl,tile_x,tile_y);
-
-    if(cell=='#') return 1;
+    if(cell=='#' || cell=='W') return 1;
+    if(cell=='P'){
+        int id=lvl->cells[tile_y][tile_x].id;
+        return id;
+    }
     return 0;
 }
 

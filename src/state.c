@@ -19,6 +19,7 @@ state *state_new(){
     sta->pla.ent.y = TILE_SIZE/2;
     sta->pla.ent.rad = PLAYER_RAD;
     sta->pla.ent.hp  = PLAYER_HP;
+    sta->pla.portal_cooldown=PLAYER_PORTAL_COOLDOWN;
 
     // Retrieve pointer to the state
     return sta;
@@ -88,6 +89,18 @@ void state_update(level *lvl, state *sta){
     // Update player
     entity_physics(lvl,&sta->pla.ent);
     if(sta->pla.ent.hp<=0) sta->pla.ent.dead=1;
+    // new - Player can interact with portals.
+    if(sta->pla.portal_cooldown>-10){
+        sta->pla.portal_cooldown -= 1;
+    }
+    int col_portal=entity_physics(lvl,&sta->pla.ent);
+    if(col_portal>=5 && sta->pla.portal_cooldown<=0){
+        // Look for next portal, It cannot be any portal within a tile from the player's center.
+        int go_to_portal=col_portal-5;
+        sta->pla.ent.x=lvl->link_portalx[go_to_portal];
+        sta->pla.ent.y=lvl->link_portaly[go_to_portal];
+        sta->pla.portal_cooldown=PLAYER_PORTAL_COOLDOWN;
+    }
     // Update enemies
     for(int i=0;i<sta->n_enemies;i++){
         entity_physics(lvl,&sta->enemies[i].ent);
@@ -97,8 +110,17 @@ void state_update(level *lvl, state *sta){
     // Update bullets
     for(int i=0;i<sta->n_bullets;i++){
         int col = entity_physics(lvl,&sta->bullets[i].ent);
-        // Kill bullet if it is colliding with a wall
-        if(col) sta->bullets[i].ent.dead = 1;
+        // Kill bullet if it is colliding with a wall - new: wall takes damage from collision.
+        if(col==1){
+            int tile_x = (int) floor(sta->bullets[i].ent.x/TILE_SIZE);
+            int tile_y = (int) floor(sta->bullets[i].ent.y/TILE_SIZE);
+            if(tile_y>=0 && tile_x>=0 && tile_y<lvl->size_y && tile_x<lvl->size_x){
+                if(lvl->cells[tile_y][tile_x].name=='#'){
+                    lvl->cells[tile_y][tile_x].hp-=BULLET_DMG;
+                }
+            }
+            sta->bullets[i].ent.dead = 1;
+        }
     }
 
 
@@ -151,7 +173,7 @@ void state_populate_random(level *lvl, state *sta, int n_enemies){
                 // Put the new enemy at the center of the chosen cell
                 new_enemy->ent.x = (posx+0.5)*TILE_SIZE;
                 new_enemy->ent.y = (posy+0.5)*TILE_SIZE;
-                // Pick an enemy tipe and set variables accordingly
+                // Pick an enemy type and set variables accordingly
                 int brute = rand()%4==0; // brute has 1/4 chance.
                 if(brute){
                     new_enemy->kind   = BRUTE;
